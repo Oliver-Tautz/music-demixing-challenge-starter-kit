@@ -1,0 +1,3 @@
+[submodule "open-unmix-pytorch"]
+	path = open-unmix-pytorch
+	url = git@github.com:Oliver-Tautz/open-unmix-pytorch.git

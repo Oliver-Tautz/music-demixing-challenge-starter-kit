@@ -10,6 +10,7 @@ import signal
 from contextlib import contextmanager
 from os import listdir
 from os.path import isfile, join
+from tqdm import tqdm
 
 import soundfile as sf
 import numpy as np
@@ -124,7 +125,7 @@ class MusicDemixingPredictor:
 
         music_names = self.get_all_music_names()
 
-        for music_name in music_names:
+        for music_name in tqdm(music_names):
             with time_limit(self.inference_per_music_timeout):
                 self.prediction(mixture_file_path=self.get_music_file_location(music_name),
                                 bass_file_path=self.get_music_file_location(music_name, "bass"),
