@@ -17,6 +17,6 @@ xumx_predictor = XUMXPredictor()
 """
 PARTICIPANT_TODO: The implementation you want to submit as your submission
 """
-submission = scaledmixture_predictor
+submission = umx_predictor
 submission.run()
 print("Successfully completed music demixing...")
