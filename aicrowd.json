@@ -2,8 +2,8 @@
   "challenge_id": "evaluations-api-music-demixing",
   "grader_id": "evaluations-api-music-demixing",
   "authors": [
-    "aicrowd-bot"
+    "olivertautz"
   ],
-  "description": "Open-Unmix Separation model",
+  "description": "first xumx baseline submission",
   "external_dataset_used": false
 }

@@ -1,4 +1,5 @@
 # Asteroid is based on PyTorch and PyTorch-Lightning.
+import torch
 from torch import optim
 from pytorch_lightning import Trainer
 
@@ -31,5 +32,9 @@ system = System(model, optimizer, loss, train_loader, val_loader)
 
 # Train for 1 epoch using a single GPU. If you're running this on Google Colab,
 # be sure to select a GPU runtime (Runtime → Change runtime type → Hardware accelarator).
+
+# low cpu usage, this does not help  ;(
+torch.set_num_threads(12)
+
 trainer = Trainer(max_epochs=1)
 trainer.fit(system)
