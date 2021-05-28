@@ -88,13 +88,13 @@ def write_sdr_values_lowpass(references_d, estimates_d, filename):
     for song in tqdm(songs, f'computing values for {filename}'):
         mixture_filename = f"{mixtures_filepath}{song}/mixture.wav"
         mixture = data.load_audio(mixture_filename)[0].T.numpy()
-        write(f'filter_test/{song}_mixture.wav', 44100, mixture)
-        for order in tqdm(range(2, 3),desc='testing_order'):
+        #write(f'filter_test/{song}_mixture.wav', 44100, mixture)
+        for order in tqdm([2,3,5,10],desc='testing_order'):
             for cutoff in tqdm(range(100, 600,50),desc='testing_fs'):
                 #cutoff = 450
                 filtered = butter_lowpass_filter(mixture, cutoff, order=order)
 
-                write(f'filter_test/{song}_{order}_filtered.wav', 44100, filtered)
+                #write(f'filter_test/{song}_{order}_filtered.wav', 44100, filtered)
                 reference = references_d[song]
                 estimate = estimates_d[song]
 
