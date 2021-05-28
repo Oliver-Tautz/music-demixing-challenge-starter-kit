@@ -174,7 +174,7 @@ if len(sys.argv) > 1:
 # write_sdr_values(references_dict,umx_estimates_dict,'umx.csv')
 # write_sdr_values(references_dict,estimates_dict,'scaled_mixture.csv')
 
-#write_sdr_values_lowpass(references_dict,umx_estimates_dict,'umx_vs_lowpass.csv')
+write_sdr_values_lowpass(references_dict,umx_estimates_dict,'umx_vs_lowpass.csv')
 write_sdr_values_lowpass(references_dict,estimates_dict,'scaled_mixture_vs_lowpass.csv')
 
 
