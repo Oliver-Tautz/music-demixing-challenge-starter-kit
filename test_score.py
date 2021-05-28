@@ -89,18 +89,19 @@ def write_sdr_values_lowpass(references_d, estimates_d, filename):
         mixture_filename = f"{mixtures_filepath}{song}/mixture.wav"
         mixture = data.load_audio(mixture_filename)[0].T.numpy()
         write(f'filter_test/{song}_mixture.wav', 44100, mixture)
-        for order in tqdm(range(1, 11),desc='testing_order'):
-            #for cutoff in tqdm(range(100, 1000,50),desc='testing_fs'):
-                cutoff = 450
+        for order in tqdm(range(2, 3),desc='testing_order'):
+            for cutoff in tqdm(range(100, 600,50),desc='testing_fs'):
+                #cutoff = 450
                 filtered = butter_lowpass_filter(mixture, cutoff, order=order)
 
-                write(f'filter_test/{song}_{order}_filtered.wav', 44100, mixture)
+                write(f'filter_test/{song}_{order}_filtered.wav', 44100, filtered)
                 reference = references_d[song]
                 estimate = estimates_d[song]
 
 
                 # replace bass prediction with low pass filtered
-                estimate_rep = replace_with(estimate, filtered, [0])
+                estimate_rep = estimate.copy()
+                estimate[0]=filtered
 
                 sdr_instr = sdr(reference, estimate_rep)
                 sdr_song_lpf = np.mean(sdr_instr)
@@ -173,7 +174,7 @@ if len(sys.argv) > 1:
 # write_sdr_values(references_dict,umx_estimates_dict,'umx.csv')
 # write_sdr_values(references_dict,estimates_dict,'scaled_mixture.csv')
 
-write_sdr_values_lowpass(references_dict,umx_estimates_dict,'umx_vs_lowpass.csv')
+#write_sdr_values_lowpass(references_dict,umx_estimates_dict,'umx_vs_lowpass.csv')
 write_sdr_values_lowpass(references_dict,estimates_dict,'scaled_mixture_vs_lowpass.csv')
 
 
