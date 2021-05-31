@@ -6,6 +6,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import sys
 
+
 from scipy.signal import butter, filtfilt
 from scipy.io.wavfile import write
 
@@ -16,7 +17,7 @@ estimates_filepath = 'data/results/'
 references_filepath = 'data/test/'
 mixtures_filepath = '/data_ssd/music-demixing-challenge-starter-kit/data/test/'
 
-songs = os.listdir(references_filepath)[0:3]
+songs = os.listdir(references_filepath)
 
 
 def get_files(filepath):
@@ -65,18 +66,18 @@ def write_sdr_values(references_d, estimates_d, filename):
             writedict['sdr_song'].append(sdr_song)
             writedict['sdt_instr'].append(sdr_instr)
 
-    csv_file = open(f'scores_test/{filename}', 'w', newline='')
-    writer = DictWriter(csv_file, fieldnames=writedict.keys(), delimiter=';')
-    writer.writeheader()
+    #csv_file = open(f'scores_test/{filename}', 'w', newline='')
+    #writer = DictWriter(csv_file, fieldnames=writedict.keys(), delimiter=';')
+    #writer.writeheader()
 
-    for i in tqdm(range(len(writedict['song'])), desc=f'writing {filename}'):
-
-        wd = dict()
-        for key in writedict.keys():
-            wd[key] = writedict[key][i]
-
-        writer.writerow(wd)
-    csv_file.close()
+    #for i in tqdm(range(len(writedict['song'])), desc=f'writing {filename}'):
+    #
+    #    wd = dict()
+    #    for key in writedict.keys():
+    #        wd[key] = writedict[key][i]
+    #
+    #    writer.writerow(wd)
+    #csv_file.close()
 
 def write_sdr_values_lowpass(references_d, estimates_d, filename):
     os.makedirs('scores_test', exist_ok=True)
@@ -89,12 +90,12 @@ def write_sdr_values_lowpass(references_d, estimates_d, filename):
         mixture_filename = f"{mixtures_filepath}{song}/mixture.wav"
         mixture = data.load_audio(mixture_filename)[0].T.numpy()
         #write(f'filter_test/{song}_mixture.wav', 44100, mixture)
-        for order in tqdm([2,3,5,10],desc='testing_order'):
-            for cutoff in tqdm(range(100, 600,50),desc='testing_fs'):
+        for order in tqdm([2],desc='testing_order'):
+            for cutoff in tqdm(range(100,600,50),desc='testing_fs'):
                 #cutoff = 450
                 filtered = butter_lowpass_filter(mixture, cutoff, order=order)
 
-                #write(f'filter_test/{song}_{order}_filtered.wav', 44100, filtered)
+                write(f'filter_test/{song}_{order}__{cutoff}filtered.wav', 44100, filtered)
                 reference = references_d[song]
                 estimate = estimates_d[song]
 
@@ -114,19 +115,19 @@ def write_sdr_values_lowpass(references_d, estimates_d, filename):
                 writedict['sdr_song_lpf'].append(sdr_song_lpf)
                 writedict['sdt_instr'].append(sdr_instr)
 
-    csv_file = open(f'scores_test/{filename}', 'w', newline='')
-    writer = DictWriter(csv_file, fieldnames=writedict.keys(), delimiter=';')
-    writer.writeheader()
-
-    for i in tqdm(range(len(writedict['song'])), desc=f'writing {filename}'):
-
-        wd = dict()
-        for key in writedict.keys():
-            wd[key] = writedict[key][i]
-
-        writer.writerow(wd)
-
-    csv_file.close()
+    #csv_file = open(f'scores_test/{filename}', 'w', newline='')
+    #writer = DictWriter(csv_file, fieldnames=writedict.keys(), delimiter=';')
+    #writer.writeheader()
+    #
+    #for i in tqdm(range(len(writedict['song'])), desc=f'writing {filename}'):
+    #
+    #    wd = dict()
+    #    for key in writedict.keys():
+    #        wd[key] = writedict[key][i]
+    #
+    #    writer.writerow(wd)
+    #
+    #csv_file.close()
 
 def butter_lowpass_filter(data, cutoff, fs=44100, order=3):
     data = data.copy().T
@@ -174,8 +175,8 @@ if len(sys.argv) > 1:
 # write_sdr_values(references_dict,umx_estimates_dict,'umx.csv')
 # write_sdr_values(references_dict,estimates_dict,'scaled_mixture.csv')
 
-write_sdr_values_lowpass(references_dict,umx_estimates_dict,'umx_vs_lowpass.csv')
-write_sdr_values_lowpass(references_dict,estimates_dict,'scaled_mixture_vs_lowpass.csv')
+write_sdr_values_lowpass(references_dict,umx_estimates_dict,'umx_vs_lowpass__smaller_grid_2_big.csv')
+write_sdr_values_lowpass(references_dict,estimates_dict,'scaled_mixture_vs_lowpass_smaller_grid_2_big.csv')
 
 
 
