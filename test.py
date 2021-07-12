@@ -95,10 +95,11 @@ class DemucsPredictor(MusicDemixingPredictor):
             if mx >= 1:
                 print('clipping', target, mx, std)
             source = source.clamp(-0.99, 0.99)
-            #ta.save(str(path), source, sample_rate=sr,encoding='PCM_S',bits_per_sample=16)
+
             if self.noise_reduction:
                 source[source < self.noise_theshold]=0
-            ta.save(str(path), source, sample_rate=sr)
+            #ta.save(str(path), source, sample_rate=sr)
+            ta.save(str(path), source, sample_rate=sr,encoding='PCM_S',bits_per_sample=16)
 
 
 if __name__ == "__main__":
