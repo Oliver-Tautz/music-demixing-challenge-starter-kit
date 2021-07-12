@@ -2,10 +2,7 @@ absl-py==0.12.0
 aicrowd-api==0.1.23
 aiohttp==3.7.4.post0
 alabaster==0.7.12
-anki @ file:///build/anki/src/anki/dist/anki-2.1.35-py3-none-any.whl
-ankirspy @ file:///build/anki/src/anki/dist/ankirspy-2.1.35-cp39-cp39-manylinux1_x86_64.whl
 appdirs==1.4.4
-aqt @ file:///build/anki/src/anki/dist/aqt-2.1.35-py3-none-any.whl
 arandr==0.1.10
 argcomplete==1.12.1
 argon2-cffi==20.1.0
@@ -146,7 +143,6 @@ opencv-contrib-python==4.5.1.48
 opencv-python==4.5.2.52
 openunmix==1.1.2
 ordered-set==4.0.2
-orjson @ file:///build/python-orjson/src/python-orjson-3.5.4/target/wheels/orjson-3.5.4-cp39-cp39-manylinux2010_x86_64.whl
 packaging==20.9
 pandas==1.2.0
 pandocfilters==1.4.3
