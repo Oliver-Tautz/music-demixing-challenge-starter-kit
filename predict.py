@@ -1,12 +1,9 @@
-from test import CopyPredictor, ScaledMixturePredictor
+
 from test_umx import UMXPredictor
 from test_xumx import XUMXPredictor
+from test import DemucsPredictor
 
-# Predictor which does nothing
-copy_predictor = CopyPredictor()
 
-# Predictor which uses 1/4*mixture as separations
-scaledmixture_predictor = ScaledMixturePredictor()
 
 # UMX needs `models` folder to be present in your submission, check test_umx.py to learn more
 umx_predictor = UMXPredictor()
@@ -17,6 +14,6 @@ xumx_predictor = XUMXPredictor()
 """
 PARTICIPANT_TODO: The implementation you want to submit as your submission
 """
-submission = umx_predictor
+submission = DemucsPredictor(noise_reduction=True,noise_threshold=0.01)
 submission.run()
 print("Successfully completed music demixing...")
