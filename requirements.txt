@@ -10,3 +10,4 @@ scipy
 norbert
 asteroid>=0.5.0
 demucs>=2.0.1
+denoiser
