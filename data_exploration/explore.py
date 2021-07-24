@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from simple_logger import SimpleLogger
 from multiprocessing import Process, Lock
+import librosa
 
 import argparse
 
@@ -24,6 +25,11 @@ reference_folder = "/home/olli/gits/music_demixing_challenge_gits/demucs/data/te
 
 metrics_folder = os.path.join(exploration_folder,'metrics')
 plots_folder = os.path.join(exploration_folder,'plots')
+
+features = ['zero_crossing_rate','spectral_centroid','spectral_rolloff']
+
+ref_features = ['ref_'+ x for x in features]
+pred_features = ['pred_'+ x for x in features]
 
 os.makedirs(metrics_folder,exist_ok=True)
 os.makedirs(plots_folder,exist_ok=True)
@@ -67,6 +73,14 @@ def sdr_nolog(references, estimates):
 def visual_loss(reference,prediction):
     return np.square(reference-prediction)
 
+def get_features(wav,sr):
+    zero_crossing = librosa.zero_crossings(wav).sum()
+    spectral_centroid = librosa.feature.spectral_centroid(wav,sr=sr,)[0].mean()
+    spectral_rolloff = librosa.feature.spectral_rolloff(wav,sr=sr)[0].mean()
+
+
+    return zero_crossing,spectral_centroid,spectral_rolloff
+
 def plot_loss_graph_plt(songame,instr,chunkid,reference, prediction,loss, loss_max,loss_min,wav_max,wav_min,filename=None, show=False,noplot=True):
     alpha = 0.2
     assert len(reference) == len(prediction)
@@ -86,14 +100,14 @@ def plot_loss_graph_plt(songame,instr,chunkid,reference, prediction,loss, loss_m
         ax2.plot(time, prediction, alpha=alpha,color='green', label='prediction')
         ax.plot(time, loss, label='loss', color='red',alpha=0.2)
 
-        ax.set_ylabel("sdr_loss")
+        ax.set_ylabel("se_loss")
 
         ax.set_ylim(loss_min, loss_max)
 
         lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
         lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
         fig.legend(lines, labels, loc='upper left', prop={'size': 6})
-        fig.suptitle(f"{songame}, {instr}, id={chunkid}\nsdr = {chunkloss}")
+        fig.suptitle(f"{songame}, {instr}, id={chunkid}\nsdr = {chunkloss}\n mse= {loss.mean()}")
 
         ax2.set_ylabel("wav")
         ax2.set_ylim(wav_min,wav_max)
@@ -102,7 +116,7 @@ def plot_loss_graph_plt(songame,instr,chunkid,reference, prediction,loss, loss_m
     if not show:
         if filename:
             if not dry_run:
-                plt.savefig(filename,dpi=300)
+                plt.savefig(filename,pil_kwargs={'quality': 60},dpi=150)
                 plt.close(fig)
         else:
             print("no filename supplied, ignoring!")
@@ -120,12 +134,20 @@ def wait_threads(threads):
     for thread in threads:
         thread.join()
 
+
 def plot_song(songname):
     csv_file = os.path.join(metrics_folder, f"{songname}.csv")
+    colnames = ['song', 'inst', 'model', 'chunklen_s', 'channel', 'second', 'chunk',
+     'sdr', 'sdr_nolog', 'mse_loss']
+
+    global  ref_features
+    global pred_features
+
+    colnames.extend(ref_features)
+    colnames.extend(pred_features)
 
     logger = SimpleLogger(filename=csv_file,
-                          colnames=['song', 'inst', 'model', 'chunklen_s', 'channel', 'second', 'chunk',
-                                    'sdr', 'sdr_nolog'])
+                          colnames=colnames)
     for instrument in instruments:
 
 
@@ -161,15 +183,18 @@ def plot_song(songname):
 
             for i, (ref_chunk, pred_chunk, loss_chunk) in enumerate(
                     tqdm(zip(ref_chunks, pred_chunks, loss_chunks), total=len(ref_chunks))):
+
+                ref_features = get_features(ref_chunk,pred_fs)
+                pred_features = get_features(pred_chunk,ref_fs)
                 filename = os.path.join(plots_folder, songname,
                                         f'{instrument}_{channel}_{i}.{plot_filetype}')
-
+                mse_loss = loss.mean()
                 loss, loss_nolog = plot_loss_graph_plt(songname, instrument, i, ref_chunk, pred_chunk,
                                                        loss_chunk, loss_max, loss_min, wav_max, wav_min,
                                                        filename=filename, show=False)
 
                 logger.log([songname, instrument, 'demucs', chunk_seconds, channel, i * chunk_seconds, i, loss,
-                            loss_nolog])
+                            loss_nolog,mse_loss,*ref_features,*pred_features])
 
 
 if __name__ == "__main__":
@@ -180,6 +205,7 @@ if __name__ == "__main__":
     threads = []
     
     for songname in os.listdir(prediction_folder):
+        os.makedirs(os.path.join(plots_folder,songname),exist_ok=True)
         p= Process(target = plot_song, args = [songname])
         p.start()
         threads.append(p)

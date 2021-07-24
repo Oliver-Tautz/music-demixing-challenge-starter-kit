@@ -22,6 +22,7 @@
 # the final trained model. Copy this model over to the `models/` folder
 # in this repository, and add it to the repo (Make sure you setup git lfs!)
 # Then, to load the model, see instructions in `prediction_setup()` hereafter.
+import os
 
 import torch.hub
 import torch
@@ -29,17 +30,19 @@ import torchaudio as ta
 
 from demucs import pretrained
 from demucs.utils import apply_model, load_model  # noqa
-
+from os.path import join
+from subprocess import run
 from evaluator.music_demixing import MusicDemixingPredictor
 
 torch.set_num_threads(8)
 
+
 class DemucsPredictor(MusicDemixingPredictor):
 
-    def __init__(self,noise_reduction=False,noise_threshold=0.01):
+    def __init__(self, noise_reduction=False, noise_threshold=0.01):
         super().__init__()
-        self.noise_reduction=noise_reduction
-        self.noise_theshold=noise_threshold
+        self.noise_reduction = noise_reduction
+        self.noise_theshold = noise_threshold
 
     def prediction_setup(self):
         # Load your model here and put it into `evaluation` mode
@@ -57,12 +60,12 @@ class DemucsPredictor(MusicDemixingPredictor):
         self.separator.eval()
 
     def prediction(
-        self,
-        mixture_file_path,
-        bass_file_path,
-        drums_file_path,
-        other_file_path,
-        vocals_file_path,
+            self,
+            mixture_file_path,
+            bass_file_path,
+            drums_file_path,
+            other_file_path,
+            vocals_file_path,
     ):
 
         # Load mixture
@@ -97,12 +100,73 @@ class DemucsPredictor(MusicDemixingPredictor):
             source = source.clamp(-0.99, 0.99)
 
             if self.noise_reduction:
-                source[source < self.noise_theshold]=0
-            #ta.save(str(path), source, sample_rate=sr)
-            ta.save(str(path), source, sample_rate=sr,encoding='PCM_S',bits_per_sample=16)
+                source[source < self.noise_theshold] = 0
+            # ta.save(str(path), source, sample_rate=sr)
+            ta.save(str(path), source, sample_rate=sr, encoding='PCM_S', bits_per_sample=16)
+
+
+# pretty crude implementation :/
+
+class DemucsDoublePredictWrapper(DemucsPredictor):
+
+    def __init__(self, tmp_dir='tmp',replace_instr=[]):
+        super().__init__()
+        self.tmp_dir = tmp_dir
+        self.replace_instr =replace_instr
+        os.makedirs(tmp_dir,exist_ok=True)
+
+    def prediction(
+            self,
+            mixture_file_path,
+            bass_file_path,
+            drums_file_path,
+            other_file_path,
+            vocals_file_path,
+    ):
+        # predict one time.
+
+        super().prediction(mixture_file_path, bass_file_path, drums_file_path, other_file_path,
+                           vocals_file_path, )
+
+        #gather input filenames
+        inputs_files = []
+
+        for instr in self.replace_instr:
+            if instr == 'bass':
+                inputs_files.append(bass_file_path)
+            if instr == 'vocals':
+                inputs_files.append(vocals_file_path)
+            if instr == 'other':
+                inputs_files.append(other_file_path)
+            if instr == 'drums':
+                inputs_files.append(drums_file_path)
+
+
+
+        # predict second time for given instruments. (inst,mixturepath) = e.g. ('bass',bass_file_path)
+        # use prediction as input for demucs.
+        for inst, mixture_path in zip(self.replace_instr,inputs_files):
+            super().prediction(mixture_path, join(self.tmp_dir, f'{inst}_bass.wav'), join(self.tmp_dir, f'{inst}_drums.wav'),
+                               join(self.tmp_dir, f'{inst}_other.wav'),
+                               join(self.tmp_dir, f'{inst}_vocals.wav'), )
+
+
+        for instr in self.replace_instr:
+
+            if instr == 'bass':
+                run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),bass_file_path])
+            if instr == 'vocals':
+                run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),vocals_file_path])
+            if instr == 'other':
+                run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),other_file_path])
+            if instr == 'drums':
+                run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),drums_file_path])
+
+        run(['rm','-rf',self.tmp_dir])
+
 
 
 if __name__ == "__main__":
-    submission = DemucsPredictor()
+    submission = DemucsDoublePredictWrapper()
     submission.run()
     print("Successfully generated predictions!")
