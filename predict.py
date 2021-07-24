@@ -1,7 +1,7 @@
 
 from test_umx import UMXPredictor
 from test_xumx import XUMXPredictor
-from test import DemucsPredictor
+from test import DemucsPredictor, DemucsDoublePredictWrapper
 
 
 
@@ -14,7 +14,7 @@ xumx_predictor = XUMXPredictor()
 """
 PARTICIPANT_TODO: The implementation you want to submit as your submission
 """
-submission = DemucsPredictor(noise_reduction=False,noise_threshold=0.01)
+submission = DemucsDoublePredictWrapper(noise_reduction=False,noise_threshold=0.01,replace_instr=['bass','vocals'])
 submission.run()
 print("Successfully completed music demixing...")
 
