@@ -14,7 +14,7 @@ xumx_predictor = XUMXPredictor()
 """
 PARTICIPANT_TODO: The implementation you want to submit as your submission
 """
-submission = DemucsDoublePredictWrapper(replace_instr=['bass','vocals'])
+submission = DemucsDoublePredictWrapper(replace_instr=['bass'])
 submission.run()
 print("Successfully completed music demixing...")
 

@@ -33,6 +33,7 @@ from demucs.utils import apply_model, load_model  # noqa
 from os.path import join
 from subprocess import run
 from evaluator.music_demixing import MusicDemixingPredictor
+import denoiser.enhance
 
 torch.set_num_threads(8)
 
