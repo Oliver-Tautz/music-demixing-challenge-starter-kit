@@ -49,6 +49,8 @@ class DemucsPredictor(MusicDemixingPredictor):
         # Load your model here and put it into `evaluation` mode
         torch.hub.set_dir('./models/')
 
+
+        print('loading_model')
         # Use a pre-trained model
         self.separator = pretrained.load_pretrained('demucs48_hq')
 
@@ -68,6 +70,8 @@ class DemucsPredictor(MusicDemixingPredictor):
             other_file_path,
             vocals_file_path,
     ):
+
+
 
         # Load mixture
         mix, sr = ta.load(str(mixture_file_path))
