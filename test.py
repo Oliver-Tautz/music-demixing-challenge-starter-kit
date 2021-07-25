@@ -134,6 +134,7 @@ class DemucsDoublePredictWrapper(DemucsPredictor):
     ):
         # predict one time.
 
+        self.tmp_dir = os.path.dirname(bass_file_path)
 
 
         super().prediction(mixture_file_path, bass_file_path, drums_file_path, other_file_path,
@@ -173,7 +174,7 @@ class DemucsDoublePredictWrapper(DemucsPredictor):
             if instr == 'drums':
                 run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),drums_file_path])
 
-        run(['rm','-rf',self.tmp_dir])
+       # run(['rm','-rf',self.tmp_dir])
 
 
 
