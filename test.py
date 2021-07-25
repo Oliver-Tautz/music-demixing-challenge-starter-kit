@@ -74,6 +74,10 @@ class DemucsPredictor(MusicDemixingPredictor):
         assert sr == self.separator.samplerate
         assert mix.shape[0] == self.separator.audio_channels
 
+
+        print(f'torch cuda avalable? {torch.cuda.is_available()}')
+        print(f'torch cuda used? {next(self.separator.parameters()).is_cuda}')
+
         # Normalize track
         mono = mix.mean(0)
         mean = mono.mean()
@@ -125,6 +129,8 @@ class DemucsDoublePredictWrapper(DemucsPredictor):
             vocals_file_path,
     ):
         # predict one time.
+
+
 
         super().prediction(mixture_file_path, bass_file_path, drums_file_path, other_file_path,
                            vocals_file_path, )
