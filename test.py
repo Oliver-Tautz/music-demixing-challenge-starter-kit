@@ -166,15 +166,73 @@ class DemucsDoublePredictWrapper(DemucsPredictor):
         for instr in self.replace_instr:
 
             if instr == 'bass':
+                print(run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),bass_file_path]))
+            if instr == 'vocals':
+                print(run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),vocals_file_path]))
+            if instr == 'other':
+                print(run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),other_file_path]))
+            if instr == 'drums':
+                print(run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),drums_file_path]))
+
+       # run(['rm','-rf',self.tmp_dir])
+
+class DemucsDenoiseWrapper(DemucsPredictor):
+
+    def __init__(self, tmp_dir='tmp', denosie_instr=['vocals']):
+        super().__init__()
+        self.tmp_dir = tmp_dir
+        self.replace_instr =denosie_instr
+        os.makedirs(tmp_dir,exist_ok=True)
+
+    def prediction(
+            self,
+            mixture_file_path,
+            bass_file_path,
+            drums_file_path,
+            other_file_path,
+            vocals_file_path,
+    ):
+        # predict one time.
+
+        self.tmp_dir = os.path.dirname(bass_file_path)
+
+
+        super().prediction(mixture_file_path, bass_file_path, drums_file_path, other_file_path,
+                           vocals_file_path, )
+
+        #gather input filenames
+        inputs_files = []
+
+        for instr in self.replace_instr:
+            if instr == 'bass':
+                inputs_files.append(bass_file_path)
+            if instr == 'vocals':
+                inputs_files.append(vocals_file_path)
+            if instr == 'other':
+                inputs_files.append(other_file_path)
+            if instr == 'drums':
+                inputs_files.append(drums_file_path)
+
+
+
+        # predict second time for given instruments. (inst,mixturepath) = e.g. ('bass',bass_file_path)
+        # use prediction as input for demucs.
+        for inst, mixture_path in zip(self.replace_instr,inputs_files):
+            super().prediction(mixture_path, join(self.tmp_dir, f'{inst}_bass.wav'), join(self.tmp_dir, f'{inst}_drums.wav'),
+                               join(self.tmp_dir, f'{inst}_other.wav'),
+                               join(self.tmp_dir, f'{inst}_vocals.wav'), )
+
+
+        for instr in self.replace_instr:
+
+            if instr == 'bass':
                 run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),bass_file_path])
             if instr == 'vocals':
-                run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),vocals_file_path])
+                print(run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),vocals_file_path]))
             if instr == 'other':
                 run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),other_file_path])
             if instr == 'drums':
                 run(['cp',join(self.tmp_dir,f"{instr}_{instr}.wav"),drums_file_path])
-
-       # run(['rm','-rf',self.tmp_dir])
 
 
 
